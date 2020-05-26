@@ -5,25 +5,31 @@ using UnityEngine;
 public class PoolManager : MonoBehaviour
 {
     public static PoolManager Instance;
-    public ProjectilePool flarePool;
-    [SerializeField] List<GameObject> flares;
+
+    public ProjectilePool wizballPool;
+    public List<GameObject> wizBalls;
+    public ProjectilePool mlawPool;
+    public List<GameObject> mlaws;
+
     public EnemyPool boarPool;
-    [SerializeField] List<GameObject> boars;
+    public List<GameObject> boars;
+    public EnemyPool birdPool;
+    public List<GameObject> birds;    
 
     void Awake() {
         Instance = this;
 
-        flarePool = new ProjectilePool(transform.GetChild(0).gameObject, flares);
-        boarPool = new EnemyPool(transform.GetChild(1).gameObject, boars);
+        wizballPool = new ProjectilePool(transform.GetChild(2).gameObject, wizBalls);
+        mlawPool = new ProjectilePool(transform.GetChild(3).gameObject, mlaws);
+
+        boarPool = new EnemyPool(transform.GetChild(0).gameObject, boars);
+        birdPool = new EnemyPool(transform.GetChild(1).gameObject, birds);
     }
     public void SetActiveRecursively(GameObject target, bool state) {
         target.SetActive(state);
         for (int i = 0; i < target.transform.childCount; i++) {
             target.transform.GetChild(i).gameObject.SetActive(state);
         }
-    }
-    public void RunCor(IEnumerator cor) {
-        StartCoroutine(cor);
     }
 
     public class Pool {
@@ -35,36 +41,33 @@ public class PoolManager : MonoBehaviour
             entities = entities_;
             for (int i = 0; i < poolObject.transform.childCount; i++) {                
                 entities.Add(poolObject.transform.GetChild(i).gameObject);
-                SetActiveRecursively(entities[i], false);
+                Instance.SetActiveRecursively(entities[i], false);
             }
-        }
-        public void SetActiveRecursively(GameObject target, bool state) {
-            target.SetActive(state);
-            for (int i = 0; i < target.transform.childCount; i++) {
-                target.transform.GetChild(i).gameObject.SetActive(state);
-            }
-        }
-        public IEnumerator ReturnEntity(GameObject entity, float time) {
-            yield return new WaitForSeconds(time);
+        }       
+        public void ReturnEntity(GameObject entity) {           
+            string type = entity.name.TrimEnd(' ', '(', '1', '2', '3', '4', '5', '6', '7', '8', '9', ')');
+            if (type == "WizBall") {
+                entity.GetComponent<WizBall>().ResetValues();
+            }            
             entity.transform.position = poolObject.transform.position;
             entity.transform.parent = poolObject.transform;
             entities.Add(entity);
-            SetActiveRecursively(entity, false);
+            Instance.SetActiveRecursively(entity, false);
         }
     }
 
     public class ProjectilePool : Pool {
         public ProjectilePool(GameObject poolObject_, List<GameObject> entities_) : base(poolObject_, entities_) { }//Constructor
 
-        public void SpawnProjectile(Vector3 spawnPoint, Quaternion rotation, float shootForce) {
+        public void SpawnProjectile(Vector3 spawnPoint, Quaternion rotation, float shootForce, float lifetime) {
             Rigidbody proj = entities[0].gameObject.GetComponent<Rigidbody>();
             entities.Remove(proj.gameObject);
-            SetActiveRecursively(proj.gameObject, true);
+            Instance.SetActiveRecursively(proj.gameObject, true);
             proj.transform.parent = null;
             proj.transform.position = spawnPoint;
             proj.transform.rotation = rotation;
             proj.AddForce(proj.transform.forward * shootForce, ForceMode.Impulse);
-            Instance.RunCor(ReturnEntity(proj.gameObject, 10));
+            proj.GetComponent<Projectile>().deathTime = Time.time + lifetime;
         }        
     }
 
@@ -74,7 +77,7 @@ public class PoolManager : MonoBehaviour
         public void SpawnEnemy(Vector3 spawnPoint) {
             GameObject enemy = entities[0];
             entities.Remove(enemy);
-            SetActiveRecursively(enemy, true);
+            Instance.SetActiveRecursively(enemy, true);
             enemy.transform.parent = null;
             enemy.transform.position = spawnPoint;
         }            
