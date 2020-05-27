@@ -6,18 +6,14 @@ public class MLAW : Projectile
 {
     public float speed;
     Rigidbody rb;
-    int random;
-
-    private void Awake() {
-        random = Random.Range(0, 2);
-        if (random == 0)
-            random = -1;
-        print(random);
-    }
+    public int random;
 
     void Start()
     {
         rb = transform.GetComponent<Rigidbody>();
+        random = Random.Range(0, 2);
+        if (random == 0)
+            random = -1;
     }    
 
     void Update()
@@ -33,14 +29,14 @@ public class MLAW : Projectile
     public void ResetValues() {
         rb.velocity = Vector3.zero;
         deathTime = 0;
+        random = Random.Range(0, 2);
+        if (random == 0)
+            random = -1;
     }
 
     private void OnTriggerEnter(Collider other) {
         string type = other.name.TrimEnd(' ', '(', '1', '2', '3', '4', '5', '6', '7', '8', '9', ')');
         if (type == "WizBall") {
-        }
-        else if (type == "Player") {
-            print("damaged " + type);
         }
         else if (type == "Bird") {
             other.GetComponent<Bird>().TakeDamage(100, PoolManager.Instance.birdPool);

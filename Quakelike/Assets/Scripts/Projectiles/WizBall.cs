@@ -5,7 +5,7 @@ using UnityEngine;
 public class WizBall : Projectile
 {
     Rigidbody rb;
-    bool released;
+    public bool released;
     void Start()
     {
         rb = transform.GetComponent<Rigidbody>();        
@@ -43,6 +43,7 @@ public class WizBall : Projectile
     }
 
     public void Release() {
+        if (gameObject.activeSelf)
         released = true;
     }
 

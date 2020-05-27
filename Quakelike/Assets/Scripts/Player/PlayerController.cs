@@ -6,7 +6,7 @@ public class PlayerController : MonoBehaviour
 {
     GameObject lightning;
     GameObject projSpawn;
-    GameObject lastProj;
+    public GameObject lastProj;
     public enum weaponType {wizBall, lightning, MLAW};
     public weaponType weapon;
     void Start()
@@ -55,6 +55,8 @@ public class PlayerController : MonoBehaviour
         PoolManager.Instance.wizballPool.SpawnProjectile(projSpawn.transform.position, projSpawn.transform.rotation, 30, 5);
     }
     void ShootMLAW() {
+        int random = Random.Range(0, 3);
+        AudioFW.Play("MLAWFire" + random);       
         PoolManager.Instance.mlawPool.SpawnProjectile(projSpawn.transform.position, projSpawn.transform.rotation, 100, 1);
     }
 }
